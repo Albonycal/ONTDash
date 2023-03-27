@@ -1,4 +1,4 @@
-# NokiaONT-UI (BETA)
+# ONTDash (BETA)
 Custom UI to manage Nokia ONT
 - Currently tested on `G-2425G-A` but should work on other models too.
 # UI
