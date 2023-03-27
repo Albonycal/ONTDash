@@ -1,10 +1,17 @@
-from flask import Flask, request
+from flask import Flask, request, render_template, jsonify, Response
+import time
 import subprocess
+#from flask_cors import CORS # For Graph Plotting (test)
 
 app = Flask(__name__)
+#CORS(app) 
+#def get_bandwidth_usage():
+ #   output = subprocess.check_output(['bash', 'scripts/get_bandwidth_usage.sh'])
+  #  return output.decode('utf-8')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+
     if request.method == 'POST':
         if 'button1' in request.form:
             subprocess.run(['bash', 'scripts/WLAN_ON.sh'])
@@ -24,6 +31,8 @@ def index():
                 <script>alert("Done")</script>
         <script>window.location.replace("/");</script> 
         '''
+
+
     else:
         return '''
             <!DOCTYPE html>
@@ -97,7 +106,15 @@ def index():
         box-shadow: none;
         transform: translateY(2px);
     }
-    #temperature {
+    #bandwidth-usage {
+    margin-top: 20px;
+    text-align: center;
+}
+#bandwidth-usage p {
+    font-size: 16px;
+    margin: 5px;
+}
+#temperature {
     font-size: 18px;
     margin-top: 20px;
     text-align: center;
@@ -116,10 +133,17 @@ def index():
                 </div>
                     <div id="temperature">ONT Temperature: <span id="temp-value">--</span></div>
                     <div id="temperature">
-                    <div id="temperature"><span id="power-value">--</span></div>
+                   <!-- <div id="temperature"><span id="power-value">--</span></div> --!>
                     <div id="temperature">Uptime: <span id="uptime-value">--</span></div>
                     </div>
-                    <br> </br>
+          <div id="temperature">
+  Inbound bandwidth: <span id="in-speed">0 Mb/s</span>
+</div>
+<div id="temperature">
+  Outbound bandwidth: <span id="out-speed">0 Mb/s</span>
+</div>
+
+          <br> </br>
 
                 <div class="form-container">
                     <form method="post">
@@ -127,9 +151,11 @@ def index():
                         <button type="submit" name="button2">Turn WiFi OFF</button>
                         <button type="submit" name="button3">Get a New IP</button>
                     </form>
-                </div>
-                <p> Made With <3 By Albony </p>
-              </div>              
+</div>
+
+                <p> Made with <3 By Albony </p>
+            </div>
+         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>   
     <script>
         function updateTemperature() {
             fetch('/temperature')  // call the '/temperature' endpoint to get the temperature
@@ -167,7 +193,16 @@ def index():
                 });
             }
              setInterval(updateUptime, 5000);
-           </script>
+const evtSource = new EventSource("/get_bandwidth");
+
+evtSource.onmessage = function(event) {
+  const data = JSON.parse(event.data);
+  document.getElementById("in-speed").innerHTML = data.megabits_in_sec + " Mb/s";
+  document.getElementById("out-speed").innerHTML = data.megabits_out_sec + " Mb/s";
+}
+
+
+         </script>
         </body>
         </html>
     '''
@@ -196,8 +231,26 @@ def optical():
         txpower = output.split('\n')[6].split(':')[1].split()[1].replace('dBm', '')
         rxpower = output.split('\n')[7].split(':')[1].split()[1].replace('dBm', '')
 
-        return f'TxPower: {txpower} dBm\nRxPower: {rxpower} dBm'
+@app.route('/get_bandwidth')
+def get_bandwidth():
+    def run_script():
+        process = subprocess.Popen(['bash', 'scripts/get_bandwidth.sh'], stdout=subprocess.PIPE)
+        while True:
+            output = process.stdout.readline().decode().strip()
+            if output == '' and process.poll() is not None:
+                break
+            yield 'data: {}\n\n'.format(output)
+            time.sleep(0.1)
+
+    return Response(run_script(), mimetype='text/event-stream')
+
+
+#@app.route('/speed')
+#def speedtest():
+ #   result = subprocess.run('scripts/speedtest', capture_output=True, text=True)
+  #  output = result.stdout.strip()
+   # return output
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=False)
 
