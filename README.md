@@ -8,3 +8,30 @@ Custom UI to manage Nokia ONT
 `python3`
 `sshpass`
 `flask` 
+
+## How to run
+
+Currently ONTDash is in beta stage, I will make a easy to install docker image once it's in a "good enough" state.
+
+```sh
+git clone https://github.com/Albonycal/ONTDash
+```
+
+
+```sh 
+cd ONTDash
+```
+
+You need to setup the environment variable `ONTPASS` as your ONT's password,
+add that to your shell's rc file (ex `.bashrc` )
+
+
+```sh
+export ONTPASS=<Password>
+```
+
+
+```sh
+python app.py&
+
+```
