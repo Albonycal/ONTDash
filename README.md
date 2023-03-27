@@ -24,7 +24,8 @@ cd ONTDash
 
 You need to setup the environment variable `ONTPASS` as your ONT's password,
 add that to your shell's rc file (ex `.bashrc` )
-
+and then `source ~/.bashrc` 
+Or you could just run it from your terminal if you are just testing.
 
 ```sh
 export ONTPASS=<Password>
