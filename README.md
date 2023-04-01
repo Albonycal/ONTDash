@@ -30,7 +30,11 @@ Or you could just run it from your terminal if you are just testing.
 ```sh
 export ONTPASS=<Password>
 ```
+Also do the same for the `ONT_IP` environment variable
 
+```sh
+export ONT_IP=<YOUR ONT IP>
+```
 
 ```sh
 python app.py&
